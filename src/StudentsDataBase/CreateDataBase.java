@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,12 +35,21 @@ public class CreateDataBase {
                 Collections.shuffle(surnames);
                 Collections.shuffle(phones);
 
+                try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM STUDENTS")) {
+                    rs.next();
+                    int count = rs.getInt(1);
+                    if (count == 0) {
 
-                for (int i = 1; i <= 10; i++) {
-                    String subclass = i <= 5 ? "A" : "B";
-                    int clas = (int) (8 + Math.random() * 3);
-                    st.executeUpdate(fillDataBase(names.get(i),surnames.get(i),15,phones.get(i),clas,subclass));
+                        for (int i = 1; i <= 10; i++) {
+                            String subclass = i <= 5 ? "A" : "B";
+                            int clas = (int) (8 + Math.random() * 3);
+                            st.executeUpdate(fillDataBase(names.get(i), surnames.get(i), 15, phones.get(i), clas, subclass));
+                        }
+                    } else {
+                        LOGGER.error("Таблица уже заполнена");
+                    }
                 }
+
 
             }
 
@@ -58,10 +64,10 @@ public class CreateDataBase {
     }
 
 
-    private static String fillDataBase(String firstName, String lastName, int age, String phone, int clas,String subclass) {
+    private static String fillDataBase(String firstName, String lastName, int age, String phone, int clas, String subclass) {
         String insertTableSQL = "INSERT INTO STUDENTS"
                 + "(FIRST_NAME, LAST_NAME, AGE, NUMBER, CLASS, SUBCLASS) " + "VALUES"
-                + "('" + firstName + "','" + lastName + "'," + age + ",'" + phone + "'," + clas + ",'" + subclass + "')";
+                + "('" + firstName + "','" + lastName + "'," + age + ",'" + phone + "'," + clas + ",'" + subclass + "') LIMIT 10";
         return insertTableSQL;
 
     }
